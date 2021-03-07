@@ -1,0 +1,11 @@
+build
+package-lock.json
+node_modules
+.idea
+tests/testconfig.json
+testconfig.json
+.wplus_data
+dist
+dbconfig.json
+.env
+*-firebase-adminsdk-*.json
