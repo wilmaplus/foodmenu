@@ -22,9 +22,11 @@
     "node-ts-cache": "^4.2.3",
     "node-ts-cache-storage-memory": "^4.2.3",
     "pdfreader": "^1.2.8",
+    "selenium-webdriver": "^4.0.0-beta.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/selenium-webdriver": "^4.0.11",
     "@types/express": "^4.17.11",
     "@types/needle": "^2.5.1",
     "@types/node": "^14.14.22",

@@ -11,7 +11,7 @@ import {Menu} from "../models/Menu";
 import {errorResponse} from "../utils/response_utilities";
 const pdfParser = require("pdfreader");
 
-const dateRegex = /[0-9]+.[0-9]+.[0-9]{4}/;
+const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
 const whitespace = " ";
 
 const type = "loviisa_pk";
