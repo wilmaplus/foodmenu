@@ -15,6 +15,7 @@ import {MemoryStorage} from "node-ts-cache-storage-memory";
 import {HashUtils} from "../crypto/hash";
 import {Day} from "../models/Day";
 import {Diet} from "../models/Diet";
+import {Options} from "selenium-webdriver/chrome";
 
 const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/;
 let httpClient = new Http();
@@ -135,7 +136,11 @@ export function getMenuOptions(req: Request, res: Response) {
         if (cachedValue) {
             responseStatus(res, 200, true, {restaurants: cachedValue});
         } else {
-            const driver = new Builder().forBrowser("chrome").build();
+            let options = new Options().headless();
+            if ((global as any).chromeArgs != null) {
+                options.addArguments((global as any).chromeArgs.split(","));
+            }
+            const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
             driver.get(url+"/Default.aspx").then(() => {
                 getRestaurantList(driver).then(restaurants => {
                     userCache.setItem(hashKey, restaurants, {ttl: 3600}).then(() => {
@@ -222,7 +227,11 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            const driver = new Builder().forBrowser("chrome").build();
+            let options = new Options().headless();
+            if ((global as any).chromeArgs != null) {
+                options.addArguments((global as any).chromeArgs.split(","));
+            }
+            const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
             driver.get(url+"/Default.aspx").then(() => {
                 selectRestaurant(driver, id).then(() => {
                     getRestaurantPDFLink(driver).then(pdfUrl => {

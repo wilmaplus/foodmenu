@@ -6,6 +6,7 @@ import express from 'express';
 import bodyParser from "body-parser";
 
 const PORT = process.env.PORT || 3001;
+const CHROME_ARGS = process.env.CHROME_ARGS || null;
 const asikkala = require('./handlers/asikkala').handleAsikkala;
 const syk = require('./handlers/syk').handleSyk;
 const steiner = require('./handlers/steiner').handleSteiner;
@@ -14,7 +15,7 @@ const kastelli = require('./handlers/kastelli').handleKastelli;
 const aromaV2 = require('./handlers/aromav2');
 const loviisa = require('./handlers/loviisa_pk');
 
-
+(global as any).chromeArgs = CHROME_ARGS;
 // Setting logs to include timestamp
 require('console-stamp')(console, 'HH:MM:ss.l');
 
