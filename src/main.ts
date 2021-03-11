@@ -30,6 +30,9 @@ app.use('/aroma/:url/restaurants/:id', aromaV2.getRestaurantPage);
 app.use('/aroma/:url/restaurants', aromaV2.getMenuOptions);
 app.use('/loviisa/paivakoti/menu', loviisa.handleLoviisaPk);
 
+app.get('*', (req, res) => {
+    res.status(404).json({'status': false, 'cause': "not found"});
+});
 
 app.listen(PORT, () => {
     console.log("Listening to port "+PORT);
