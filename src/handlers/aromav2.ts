@@ -192,30 +192,17 @@ export function getRestaurantPage(req: Request, res: Response) {
                 });
             });
         };
-        const contains = (item: string, items: Diet[]) => {
+        /*const contains = (item: string, items: Diet[]) => {
             let found = false;
             items.forEach(item2 => {
                 if (item.toLowerCase() == item2.name.toLowerCase())
                     found = true;
             });
             return found;
-        }
+        }*/
+        // Revert to single week, because request is taking too long to complete
         fetchDate("1", (restaurants, diets) => {
-            fetchDate("2", ((restaurants1, diets1) => {
-                fetchDate("3", ((restaurants2, diets2) => {
-                    restaurants1.forEach(item => restaurants.push(item));
-                    restaurants2.forEach(item => restaurants.push(item));
-                    diets1.forEach(dItem => {if (!contains(dItem.name, diets)) {diets.push(dItem)}});
-                    diets2.forEach(dItem => {if (!contains(dItem.name, diets)) {diets.push(dItem)}});
-                    responseStatus(res, 200, true, {menu: restaurants, diets: diets});
-                }), error => {
-                    errorResponse(res, 500, error);
-                    return;
-                });
-            }), error => {
-                errorResponse(res, 500, error);
-                return;
-            });
+            responseStatus(res, 200, true, {menu: restaurants, diets: diets});
         }, error => {
             errorResponse(res, 500, error);
             return;
