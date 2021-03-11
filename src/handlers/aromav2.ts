@@ -63,7 +63,8 @@ function selectRestaurant(driver: ThenableWebDriver, id: string) {
             let position = -1;
             restaurants.forEach((restaurant, index) => {
                 if (restaurant.id == id) {
-                    position = index
+                    // Adding one to index, because getRestaurantList removes first item, as it's not a restaurant
+                    position = index+1
                 }
             });
             if (position === -1) {
@@ -214,7 +215,7 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            let options = new Options().headless();
+            let options = new Options();
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
