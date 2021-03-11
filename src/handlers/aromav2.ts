@@ -137,8 +137,8 @@ export function getMenuOptions(req: Request, res: Response) {
             responseStatus(res, 200, true, {restaurants: cachedValue});
         } else {
             let options = new Options().headless();
-            if ((global as any).chromeArgs != null) {
-                options.addArguments((global as any).chromeArgs.split(","));
+            if ((global as any).seleniumArgs != null) {
+                options.addArguments((global as any).seleniumArgs.split(","));
             }
             const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
             driver.get(url+"/Default.aspx").then(() => {
@@ -215,8 +215,8 @@ export function getRestaurantPage(req: Request, res: Response) {
             fetchDocument(value as string);
         else {
             let options = new Options().headless();
-            if ((global as any).chromeArgs != null) {
-                options.addArguments((global as any).chromeArgs.split(","));
+            if ((global as any).seleniumArgs != null) {
+                options.addArguments((global as any).seleniumArgs.split(","));
             }
             const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
             driver.get(url+"/Default.aspx").then(() => {
