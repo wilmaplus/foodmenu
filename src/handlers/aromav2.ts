@@ -215,7 +215,7 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            let options = new Options();
+            let options = new Options().headless();
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
