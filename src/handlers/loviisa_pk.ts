@@ -8,7 +8,7 @@ import {errorResponse, responseStatus} from "../utils/response_utilities";
 import {parsePDFLink, parse} from "../parsers/loviisa_pk";
 
 
-const url = "https://www.loviisa.fi/paivahoito-ja-koulutus/kouluruokailu/";
+const url = "https://www.loviisa.fi/varhaiskasvatus-ja-koulutus/kouluruokailu/";
 let httpClient = new Http();
 
 
