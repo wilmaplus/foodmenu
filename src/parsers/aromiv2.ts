@@ -21,8 +21,13 @@ export function parse(content: any, callback: (content: Day[]|undefined, diets: 
     let rows: any = {}; // indexed by y-position
     let days: Day[] = [];
     let diets: Diet[] = [];
-    new pdfParser.PdfReader().parseBuffer(content, (pdfError: Error, pdf: any) => {
+    new pdfParser.PdfReader().parseBuffer(content, (pdfError: {parserError: string}, pdf: any) => {
         if (pdfError) {
+            // This error occurs when menu is empty
+            if (pdfError.parserError.toLowerCase().includes("bad xref entry")) {
+                callback([], []);
+                return;
+            }
             console.error(pdfError);
             callback(undefined, undefined);
             return;
