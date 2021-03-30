@@ -132,6 +132,8 @@ export function getMenuOptions(req: Request, res: Response) {
         responseStatus(res, 400, false, {cause: 'Invalid of malformed URL!'});
         return;
     }
+    if (url.endsWith("/"))
+        url = url.substr(0, url.length-1);
     let hashKey = HashUtils.sha1Digest(url+"_aroma");
     userCache.getItem(hashKey).then(cachedValue => {
         if (cachedValue) {
@@ -177,6 +179,8 @@ export function getRestaurantPage(req: Request, res: Response) {
         responseStatus(res, 400, false, {cause: 'Invalid of malformed URL!'});
         return;
     }
+    if (url.endsWith("/"))
+        url = url.substr(0, url.length-1);
     const fetchDocument = (pdfUrl: string) => {
         const fetchDate = (date: string, callback: (restaurants: Day[], diets: Diet[]) => void, errorCallback: (error: Error | null) => void) => {
             httpClient.get(pdfUrl.replace("%dmd%", date), (error, response) =>  {
