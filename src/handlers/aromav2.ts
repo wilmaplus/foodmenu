@@ -4,7 +4,7 @@
 
 import {Request, Response} from "express";
 import {errorResponse, responseStatus} from "../utils/response_utilities";
-import {Builder, By, ThenableWebDriver} from "selenium-webdriver";
+import {Builder, By, ThenableWebDriver, WebElementCondition, Condition, until} from "selenium-webdriver";
 import {Restaurant} from "../models/Restaurant";
 import {AsyncIterator} from "../utils/iterator";
 import {elementLocated} from "selenium-webdriver/lib/until";
@@ -104,12 +104,44 @@ function selectRestaurant(driver: ThenableWebDriver, id: string) {
 
 }
 
+/**
+ * Thank aromi food service (or CGI) for making this promise hell :D
+ * @param driver
+ */
 function getRestaurantPDFLink(driver: ThenableWebDriver) {
     return new Promise<string>((resolve, reject) => {
         driver.wait(elementLocated(By.id("MainContent_PdfUrl"))).then(() => {
             driver.findElement(By.id("MainContent_PdfUrl")).then(pdfUrl => {
                 pdfUrl.getAttribute("href").then(url => {
-                    resolve(url);
+                    if (url == null) {
+                        driver.findElement(By.id("MainContent_RestaurantDateRangesFilterHeadersDataList_RestaurantDateRangesFilterHeadersLinkButton_1")).then(item => {
+                            item.click().then(() => {
+                                driver.wait(until.elementLocated(By.id("MainContent_UpdateProgress2"))).then((element) => {
+                                    driver.wait(until.stalenessOf(element)).then(() => {
+                                        driver.findElement(By.id("MainContent_PdfUrl")).then(pdfUrl => {
+                                            pdfUrl.getAttribute("href").then(url => {
+                                                resolve(url);
+                                            }).catch(error => {
+                                                reject(error);
+                                            });
+                                        }).catch(error => {
+                                            reject(error);
+                                        });
+                                    }).catch(error => {
+                                        reject(error);
+                                    });
+                                }).catch(error => {
+                                    reject(error);
+                                });
+                            }).catch(error => {
+                                reject(error);
+                            });
+                        }).catch(error => {
+                            reject(error);
+                        });
+                    } else {
+                        resolve(url);
+                    }
                 }).catch(error => {
                     reject(error);
                 });
@@ -139,7 +171,7 @@ export function getMenuOptions(req: Request, res: Response) {
         if (cachedValue) {
             responseStatus(res, 200, true, {restaurants: cachedValue});
         } else {
-            let options = new Options().headless();
+            let options = new Options();
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
@@ -219,7 +251,7 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            let options = new Options().headless();
+            let options = new Options();
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
@@ -227,7 +259,11 @@ export function getRestaurantPage(req: Request, res: Response) {
             driver.get(url+"/Default.aspx").then(() => {
                 selectRestaurant(driver, id).then(() => {
                     getRestaurantPDFLink(driver).then(pdfUrl => {
-                        driver.close();
+                        //driver.close();
+                        if (url == null) {
+                            responseStatus(res, 200, true, {menu: [], diets: []});
+                            return;
+                        }
                         pdfUrl = pdfUrl.replace("DateMode=0", "DateMode=%dmd%");
                         userCache.setItem(hashKey, pdfUrl, {ttl: 3600}).then(() => {
                             fetchDocument(pdfUrl);
