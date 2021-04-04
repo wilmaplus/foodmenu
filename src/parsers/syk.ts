@@ -35,7 +35,7 @@ export function parse(html: string): Day[]|undefined {
             } else if (begin && item.tagName.toLowerCase() == "ul") {
                 let mealText = item.querySelector("li span[style=\"color: #f0a519;\"]");
                 if (mealText != null) {
-                    mealText = mealText.parentNode.parentNode;
+                    mealText = mealText.parentNode.parentNode.parentNode;
                     let splitContent = mealText.text.split(":");
                     if (splitContent.length > 1) {
                         let content = splitContent[1].trim();
