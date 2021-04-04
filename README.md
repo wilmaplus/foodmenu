@@ -9,3 +9,4 @@ This middleware converts them to JSON format.
 - Pyhtää ([https://pyhtaa.fi/fi/lounaslista-koulut](https://pyhtaa.fi/fi/lounaslista-koulut))
 - Tampereen Steinerkoulu ([https://www.tampereensteinerkoulu.fi/luomuravintola-timjami/ruokalista/](https://www.tampereensteinerkoulu.fi/luomuravintola-timjami/ruokalista/))
 - SYK ([https://syk.fi/](https://syk.fi/))
+- Any Aromi V2 (aka. Aromi SaaS)
