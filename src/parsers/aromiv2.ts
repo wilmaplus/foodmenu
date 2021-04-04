@@ -60,7 +60,8 @@ export function parse(content: any, callback: (content: Day[]|undefined, diets: 
                                 items.push(new Meal(HashUtils.sha1Digest(type+mealType+"_"+meal.text), meal.text));
                             }
                         }
-                        tempMenuList.push(new Menu(mealType, items));
+                        if (items.length > 0)
+                            tempMenuList.push(new Menu(mealType, items));
                     }
                 }
             });
