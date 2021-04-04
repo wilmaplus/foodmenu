@@ -171,7 +171,7 @@ export function getMenuOptions(req: Request, res: Response) {
         if (cachedValue) {
             responseStatus(res, 200, true, {restaurants: cachedValue});
         } else {
-            let options = new Options();
+            let options = new Options().headless().windowSize({width: 1270, height: 780});
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
@@ -251,7 +251,7 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            let options = new Options();
+            let options = new Options().headless().windowSize({width: 1270, height: 780});
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
@@ -259,7 +259,7 @@ export function getRestaurantPage(req: Request, res: Response) {
             driver.get(url+"/Default.aspx").then(() => {
                 selectRestaurant(driver, id).then(() => {
                     getRestaurantPDFLink(driver).then(pdfUrl => {
-                        //driver.close();
+                        driver.close();
                         if (url == null) {
                             responseStatus(res, 200, true, {menu: [], diets: []});
                             return;
