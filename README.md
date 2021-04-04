@@ -1,6 +1,6 @@
 # Wilma Plus Food Menu API
 This API provides additional food menus which are not available as JSON.
-This middleware converts them to JSON format.
+This middleware parses HTML or PDF and then converts them to JSON format.
 
 ### Current list of supported menus
 - Asikkala ([https://www.asikkala.fi/koulujen-ruokalista/](https://www.asikkala.fi/koulujen-ruokalista/))
@@ -9,3 +9,4 @@ This middleware converts them to JSON format.
 - Pyhtää ([https://pyhtaa.fi/fi/lounaslista-koulut](https://pyhtaa.fi/fi/lounaslista-koulut))
 - Tampereen Steinerkoulu ([https://www.tampereensteinerkoulu.fi/luomuravintola-timjami/ruokalista/](https://www.tampereensteinerkoulu.fi/luomuravintola-timjami/ruokalista/))
 - SYK ([https://syk.fi/](https://syk.fi/))
+- Any Aromi V2 (aka. Aromi SaaS)
