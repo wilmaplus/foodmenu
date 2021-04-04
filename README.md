@@ -1,6 +1,6 @@
 # Wilma Plus Food Menu API
 This API provides additional food menus which are not available as JSON.
-This middleware converts them to JSON format.
+This middleware parses HTML or PDF and then converts them to JSON format.
 
 ### Current list of supported menus
 - Asikkala ([https://www.asikkala.fi/koulujen-ruokalista/](https://www.asikkala.fi/koulujen-ruokalista/))
