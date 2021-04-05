@@ -10,3 +10,6 @@ This middleware parses HTML or PDF and then converts them to JSON format.
 - Tampereen Steinerkoulu ([https://www.tampereensteinerkoulu.fi/luomuravintola-timjami/ruokalista/](https://www.tampereensteinerkoulu.fi/luomuravintola-timjami/ruokalista/))
 - SYK ([https://syk.fi/](https://syk.fi/))
 - Any Aromi V2 (aka. Aromi SaaS)
+
+### Documentation
+Check the wiki
