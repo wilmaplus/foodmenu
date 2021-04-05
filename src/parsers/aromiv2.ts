@@ -40,7 +40,6 @@ export function parse(content: any, callback: (content: Day[]|undefined, diets: 
             let tmpItems: Meal[] = [];
             let tmpContent = '';
             items.forEach(key => {
-
                 let item = rows[key];
                 if (item.length > 0) {
                     let firstEntry = item[0];
