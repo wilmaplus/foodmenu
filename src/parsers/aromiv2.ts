@@ -36,12 +36,24 @@ export function parse(content: any, callback: (content: Day[]|undefined, diets: 
             let items = Object.keys(rows).sort((y1, y2) => parseFloat(y1) - parseFloat(y2));
             let lastDate: Moment|null = null;
             let tempMenuList:Menu[] = [];
+            let mealType = "Lounas";
+            let tmpItems: Meal[] = [];
+            let tmpContent = '';
             items.forEach(key => {
+
                 let item = rows[key];
                 if (item.length > 0) {
                     let firstEntry = item[0];
                     if (firstEntry.text.match(dateRegex)) {
                         // Date found
+                        if (tmpContent.length > 0) {
+                            tmpItems.push(new Meal(HashUtils.sha1Digest(type+mealType+"_"+tmpContent), tmpContent));
+                            tmpContent = '';
+                        }
+                        if (tmpItems.length > 0) {
+                            tempMenuList.push(new Menu(mealType, tmpItems));
+                            tmpItems = [];
+                        }
                         let regexResult = dateRegex.exec(firstEntry.text);
                         if (regexResult != null) {
                             if (tempMenuList.length > 0 && lastDate != null) {
@@ -51,20 +63,42 @@ export function parse(content: any, callback: (content: Day[]|undefined, diets: 
                             lastDate = moment(regexResult[0], "DD.MM.YYYY").startOf('day');
                         }
                     } else if (lastDate != null) {
-                        let mealType = "Lounas";
-                        let items: Meal[] = [];
+
                         for (let meal of item) {
                             if (meal.x < 3 && meal.x > 1) {
+                                if (tmpContent.length > 0) {
+                                    tmpItems.push(new Meal(HashUtils.sha1Digest(type+mealType+"_"+tmpContent), tmpContent));
+                                    tmpContent = '';
+                                }
+                                if (tmpItems.length > 0) {
+                                    tempMenuList.push(new Menu(mealType, tmpItems));
+                                    tmpItems = [];
+                                }
                                 mealType = meal.text;
+                                console.log(mealType);
                             } else if (meal.x > 4) {
-                                items.push(new Meal(HashUtils.sha1Digest(type+mealType+"_"+meal.text), meal.text));
+                                tmpContent += meal.text;
+                                console.log(tmpContent);
                             }
                         }
-                        if (items.length > 0)
-                            tempMenuList.push(new Menu(mealType, items));
+
                     }
                 }
             });
+            if (tmpContent.length > 0) {
+                tmpItems.push(new Meal(HashUtils.sha1Digest(type+mealType+"_"+tmpContent), tmpContent));
+                tmpContent = '';
+            }
+            if (tmpItems.length > 0) {
+                tempMenuList.push(new Menu(mealType, tmpItems));
+                tmpItems = [];
+            }
+            if (tmpItems.length > 0) {
+                if (tmpContent.length > 0)
+                    tmpItems.push(new Meal(HashUtils.sha1Digest(type+mealType+"_"+tmpContent), tmpContent));
+                tempMenuList.push(new Menu(mealType, tmpItems));
+                tmpItems = [];
+            }
             if (tempMenuList.length > 0 && lastDate != null) {
                 days.push(new Day(lastDate, tempMenuList));
                 tempMenuList = [];
