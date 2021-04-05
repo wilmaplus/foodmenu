@@ -160,6 +160,8 @@ export function getMenuOptions(req: Request, res: Response) {
         return;
     }
     let url = req.params.url;
+    let fullUrl = url.includes("aromiv2://");
+    url = url.replace("aromiv2://", "https://");
     if (!url.match(urlRegex)) {
         responseStatus(res, 400, false, {cause: 'Invalid of malformed URL!'});
         return;
@@ -176,7 +178,7 @@ export function getMenuOptions(req: Request, res: Response) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
             const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
-            driver.get(url+"/Default.aspx").then(() => {
+            driver.get(url+(fullUrl ? "" : "/Default.aspx")).then(() => {
                 getRestaurantList(driver).then(restaurants => {
                     userCache.setItem(hashKey, restaurants, {ttl: 3600}).then(() => {
                         responseStatus(res, 200, true, {restaurants});
@@ -207,6 +209,12 @@ export function getRestaurantPage(req: Request, res: Response) {
     }
     let url = req.params.url;
     let id = req.params.id;
+    let fullUrl = url.includes("aromiv2://");
+    url = url.replace("aromiv2://", "https://");
+    if (!url.match(urlRegex)) {
+        responseStatus(res, 400, false, {cause: 'Invalid of malformed URL!'});
+        return;
+    }
     if (!url.match(urlRegex)) {
         responseStatus(res, 400, false, {cause: 'Invalid of malformed URL!'});
         return;
@@ -256,11 +264,11 @@ export function getRestaurantPage(req: Request, res: Response) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
             const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
-            driver.get(url+"/Default.aspx").then(() => {
+            driver.get(url+(fullUrl ? "" : "/Default.aspx")).then(() => {
                 selectRestaurant(driver, id).then(() => {
                     getRestaurantPDFLink(driver).then(pdfUrl => {
                         driver.close();
-                        if (url == null) {
+                        if (pdfUrl == null) {
                             responseStatus(res, 200, true, {menu: [], diets: []});
                             return;
                         }
