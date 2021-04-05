@@ -75,10 +75,8 @@ export function parse(content: any, callback: (content: Day[]|undefined, diets: 
                                     tmpItems = [];
                                 }
                                 mealType = meal.text;
-                                console.log(mealType);
                             } else if (meal.x > 4) {
                                 tmpContent += meal.text;
-                                console.log(tmpContent);
                             }
                         }
 
