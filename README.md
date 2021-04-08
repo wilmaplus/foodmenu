@@ -12,4 +12,4 @@ This middleware parses HTML or PDF and then converts them to JSON format.
 - Any Aromi V2 (aka. Aromi SaaS)
 
 ### Documentation
-Check the wiki
+Read the [wiki](https://github.com/wilmaplus/foodmenu/wiki)
