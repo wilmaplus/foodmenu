@@ -12,6 +12,7 @@ const syk = require('./handlers/syk').handleSyk;
 const steiner = require('./handlers/steiner').handleSteiner;
 const pyhtaa = require('./handlers/pyhtaa').handlePyhtaa;
 const kastelli = require('./handlers/kastelli').handleKastelli;
+const ael = require('./handlers/ael').handleAEL;
 const aromaV2 = require('./handlers/aromav2');
 const loviisa = require('./handlers/loviisa_pk');
 
@@ -27,6 +28,7 @@ app.use('/syk/menu', syk);
 app.use('/steiner/menu', steiner);
 app.use('/pyhtaa/menu', pyhtaa);
 app.use('/kastelli/menu', kastelli);
+app.use('/ael/menu', ael);
 app.use('/aroma/:url/restaurants/:id', aromaV2.getRestaurantPage);
 app.use('/aroma/:url/restaurants', aromaV2.getMenuOptions);
 app.use('/loviisa/paivakoti/menu', loviisa.handleLoviisaPk);
