@@ -5,7 +5,7 @@
 import {Request, Response} from "express";
 import {Http} from "../net/http";
 import {errorResponse, responseStatus} from "../utils/response_utilities";
-import {parse} from "../parsers/kastelli";
+import {parse} from "../parsers/ael";
 
 
 const url = "https://ravintolapalvelut.iss.fi/ael";
