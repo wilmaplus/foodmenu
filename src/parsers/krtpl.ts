@@ -7,11 +7,7 @@ import moment from 'moment';
 import {Day} from "../models/Day";
 import {Meal} from "../models/Meal";
 import {HashUtils} from "../crypto/hash";
-import {Menu} from "../models/Menu";
 import {Diet} from "../models/Diet";
-
-const dateRegex = /[0-9]+.[0-9]+.[0-9]{4}/;
-const whitespace = " ";
 
 const type = "krtpl";
 
