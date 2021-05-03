@@ -6,10 +6,10 @@ import {Menu} from "./Menu";
 import {Moment} from "moment";
 
 export class Day {
-    date: Moment
+    date: any
     menus: Menu[]
 
-    constructor(date: Moment, menus: Menu[]) {
+    constructor(date: any, menus: Menu[]) {
         this.date = date;
         this.menus = menus;
     }
