@@ -10,7 +10,7 @@ import {AsyncIterator} from "../utils/iterator";
 import {Day} from "../models/Day";
 import {Diet} from "../models/Diet";
 
-const url = "https://looki.fi/koulut-ja-paivakodit-b";
+const url = "https://looki.fi/";
 let httpClient = new Http();
 
 function fetchAndParse(url: string): Promise<any> {
@@ -26,7 +26,11 @@ function fetchAndParse(url: string): Promise<any> {
 }
 
 export function handleLookiKbp(req: Request, res: Response) {
-    httpClient.get(url, (error, response) => {
+    if (!req.params.endpoint) {
+        errorResponse(res, 400, "Menu endpoint is missing!");
+        return;
+    }
+    httpClient.get(url+req.params.endpoint, (error, response) => {
         if (error || response == undefined) {
             errorResponse(res, 500, error);
             return;
