@@ -48,7 +48,7 @@ export function handleLookiKbp(req: Request, res: Response) {
                     errorResponse(res, 500, error);
                 })
             }, menuLinks, ()=>{
-                responseStatus(res, 200, true, {menus: items, diets})
+                responseStatus(res, 200, true, {menu: items, diets})
             });
             linkIterator.start();
         } else {
