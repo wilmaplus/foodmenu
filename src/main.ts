@@ -4,11 +4,17 @@
 
 import express from 'express';
 import bodyParser from "body-parser";
+import {handlePoytya_PS} from "./handlers/poytyaps";
+import {handleKauhajoki} from "./handlers/kauhajoki";
 
 const PORT = process.env.PORT || 3001;
 const SELENIUM_ARGS = process.env.SELENIUM_ARGS || null;
 const asikkala = require('./handlers/asikkala').handleAsikkala;
 const syk = require('./handlers/syk').handleSyk;
+const tyk = require('./handlers/tyk').handleTyk;
+const phyk = require('./handlers/phyk').handlePhyk;
+const poytyaps = require('./handlers/poytyaps').handlePoytya_PS;
+const kauhajoki = require('./handlers/kauhajoki').handleKauhajoki;
 const steiner = require('./handlers/steiner').handleSteiner;
 const krtpl = require('./handlers/krtpl').handleKrtpl;
 const lookiKbp = require('./handlers/looki-html').handleLookiKbp;
@@ -30,6 +36,10 @@ app.use('/syk/menu', syk);
 app.use('/steiner/menu', steiner);
 app.use('/pyhtaa/menu', pyhtaa);
 app.use('/krtpl/menu', krtpl);
+app.use('/tyk/menu', tyk);
+app.use('/phyk/menu', phyk);
+app.use('/poytyaps/menu', poytyaps);
+app.use('/kauhajoki/menu', kauhajoki);
 app.use('/looki/:endpoint/menu', lookiKbp);
 app.use('/kastelli/menu', kastelli);
 app.use('/ael/menu', ael);
