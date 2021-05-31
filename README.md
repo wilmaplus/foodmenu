@@ -5,6 +5,7 @@ This middleware parses HTML or PDF and then converts them to JSON format.
 ### Current list of supported menus
 - Asikkala ([https://www.asikkala.fi/koulujen-ruokalista/](https://www.asikkala.fi/koulujen-ruokalista/))
 - Kastelli ([https://ravintolapalvelut.iss.fi/kastelli](https://ravintolapalvelut.iss.fi/kastelli))
+- Mäntälän koulut ([https://mantsala.ravintolapalvelut.iss.fi/mantsalan-koulu](https://mantsala.ravintolapalvelut.iss.fi/mantsalan-koulu))
 - Kanresta: Tampere-Pirkkala lentoasema ([https://www.kanresta.fi/ravintola/tampere-pirkkala-lentoasema/](https://www.kanresta.fi/ravintola/tampere-pirkkala-lentoasema/))
 - AEL ([https://ravintolapalvelut.iss.fi/ael](https://ravintolapalvelut.iss.fi/ael))
 - Loviisa ([https://www.loviisa.fi/paivahoito-ja-koulutus/kouluruokailu/](https://www.loviisa.fi/paivahoito-ja-koulutus/kouluruokailu/))

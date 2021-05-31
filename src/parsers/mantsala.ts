@@ -6,7 +6,7 @@ import {Day} from "../models/Day";
 import {Diet} from "../models/Diet";
 import * as parser from './iss-web';
 
-const type = "kastelli";
+const type = "mäntsälä";
 
 export function parse(html: string): {menu: Day[], diets: Diet[]}|undefined {
     return parser.parse(html, type);

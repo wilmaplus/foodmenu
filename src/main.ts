@@ -4,8 +4,6 @@
 
 import express from 'express';
 import bodyParser from "body-parser";
-import {handlePoytya_PS} from "./handlers/poytyaps";
-import {handleKauhajoki} from "./handlers/kauhajoki";
 
 const PORT = process.env.PORT || 3001;
 const SELENIUM_ARGS = process.env.SELENIUM_ARGS || null;
@@ -20,6 +18,7 @@ const krtpl = require('./handlers/krtpl').handleKrtpl;
 const lookiKbp = require('./handlers/looki-html').handleLookiKbp;
 const pyhtaa = require('./handlers/pyhtaa').handlePyhtaa;
 const kastelli = require('./handlers/kastelli').handleKastelli;
+const mantsala = require('./handlers/mantsala').handleMantsala;
 const ael = require('./handlers/ael').handleAEL;
 const aromaV2 = require('./handlers/aromav2');
 const loviisa = require('./handlers/loviisa_pk');
@@ -43,6 +42,7 @@ app.use('/kauhajoki/menu', kauhajoki);
 app.use('/looki/:endpoint/menu', lookiKbp);
 app.use('/kastelli/menu', kastelli);
 app.use('/ael/menu', ael);
+app.use('/mantsala/menu', mantsala);
 app.use('/aroma/:url/restaurants/:id', aromaV2.getRestaurantPage);
 app.use('/aroma/:url/restaurants', aromaV2.getMenuOptions);
 app.use('/loviisa/paivakoti/menu', loviisa.handleLoviisaPk);
