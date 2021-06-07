@@ -49,6 +49,12 @@ export function parse(html: string, type: string): {menu: Day[], diets: Diet[]}|
         let nutritionDiv = document.querySelector("div[class=\"nutrition-details\"]");
         let nutritionText = nutritionDiv.querySelector("p");
 
+        // Sort by date to fix sorting if multiple weeks are present. Parser does not follow orders
+        // specified in HTML, so we fix that by manually sorting all items by date.
+        items.sort((a, b) => {
+            return new Date(a.date).getTime()-new Date(b.date).getTime();
+        });
+
         let diets: Diet[] = [];
         for (let item of nutritionText.text.split(",")) {
             let split = item.split("=");

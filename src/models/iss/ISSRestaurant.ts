@@ -1,4 +1,8 @@
 
+/*
+ * Copyright (c) 2021 wilmaplus-foodmenu, developed by @developerfromjokela, for Wilma Plus mobile app
+ */
+
 export class ISSRestaurant {
     url: string|undefined
     name: string
