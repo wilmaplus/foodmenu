@@ -10,6 +10,7 @@ import moment from "moment";
 import {Meal} from "../models/Meal";
 import {HashUtils} from "../crypto/hash";
 import {Menu} from "../models/Menu";
+import {ISSRestaurant} from "../models/iss/ISSRestaurant";
 
 const dateRegex = /([0-9]+).([0-9]+)/;
 
@@ -58,4 +59,14 @@ export function parse(html: string, type: string): {menu: Day[], diets: Diet[]}|
         return {menu: items, diets: diets};
     }
     return undefined;
+}
+
+export function parseList(html: string): ISSRestaurant[] {
+    let document = parser.parse(html);
+    let links = document.querySelectorAll("a[class=\"ravintola__link\"]");
+    let list: ISSRestaurant[] = [];
+    links.forEach(item => {
+        list.push(new ISSRestaurant(item.getAttribute('href'), item.text.trim()));
+    })
+    return list;
 }
