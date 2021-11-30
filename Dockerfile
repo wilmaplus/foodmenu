@@ -40,8 +40,6 @@ USER root
 RUN apk add --no-cache ca-certificates tzdata mailcap
 
 
-ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
-
 COPY package.json .
 RUN wget https://github.com/wilmaplus/foodmenu/releases/latest/download/dist.tar.gz
 RUN tar -xf dist.tar.gz
@@ -49,4 +47,6 @@ RUN rm dist.tar.gz
 USER chrome
 RUN npm install
 
+# Docker in itself is a sandbox, so can't care less about chromium sandbox. Chrome won't be handling any personal data anyways.
+ENV SELENIUM_ARGS="--no-sandbox"
 CMD [ "node", "main.js" ]
