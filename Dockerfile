@@ -1,25 +1,52 @@
 FROM arm64v8/node:16-alpine3.14
 
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.33-r0/glibc-2.33-r0.apk
-RUN apk add glibc-2.33-r0.apk
+# Installs latest Chromium package.
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories \
+    && echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+    && echo "http://dl-cdn.alpinelinux.org/alpine/v3.12/main" >> /etc/apk/repositories \
+    && apk upgrade -U -a \
+    && apk add \
+    libstdc++ \
+    chromium \
+    harfbuzz \
+    nss \
+    freetype \
+    ttf-freefont \
+    font-noto-emoji \
+    wqy-zenhei \
+    chromium-chronedriver \
+    && rm -rf /var/cache/* \
+    && mkdir /var/cache/apk
 
-RUN apk add --no-cache python3 && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    rm -r /root/.cache
+COPY local.conf /etc/fonts/local.conf
 
-RUN apk add --update alpine-sdk
-
+# Add Chrome as a user
+RUN mkdir -p /usr/src/app \
+    && adduser -D chrome \
+    && chown -R chrome:chrome /usr/src/app
+# Run Chrome as non-privileged
+USER chrome
 WORKDIR /usr/src/app
+
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/
+
+USER root
+RUN apk add --no-cache tini make gcc g++ python3 git nodejs nodejs-npm yarn
+USER chrome
+
+USER root
+RUN apk add --no-cache ca-certificates tzdata mailcap
+
+
+ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 
 COPY package.json .
 RUN wget https://github.com/wilmaplus/foodmenu/releases/latest/download/dist.tar.gz
 RUN tar -xf dist.tar.gz
 RUN rm dist.tar.gz
+USER chrome
 RUN npm install
 
-EXPOSE 3001
 CMD [ "node", "main.js" ]
