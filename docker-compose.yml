@@ -1,0 +1,9 @@
+version: "2"
+
+services:
+  foodmenu:
+    build: ./
+    image: foodmenu_server
+    ports:
+      - "8081:3001"
+    restart: unless-stopped
