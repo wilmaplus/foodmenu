@@ -15,7 +15,7 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositorie
     ttf-freefont \
     font-noto-emoji \
     wqy-zenhei \
-    chromium-chronedriver \
+    chromium-chromedriver \
     && rm -rf /var/cache/* \
     && mkdir /var/cache/apk
 
