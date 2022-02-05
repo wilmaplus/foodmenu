@@ -15,6 +15,8 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositorie
     ttf-freefont \
     font-noto-emoji \
     wqy-zenhei \
+    ghostscript \
+    qpdf \
     chromium-chromedriver \
     && rm -rf /var/cache/* \
     && mkdir /var/cache/apk
@@ -47,6 +49,7 @@ RUN rm dist.tar.gz
 USER chrome
 RUN npm install
 
+# Enable disk cache to speed up page load times, and disables miscellanous shit not necessary for chome
 # Docker in itself is a sandbox, so can't care less about chromium sandbox. Chrome won't be handling any personal data anyways.
-ENV SELENIUM_ARGS="--no-sandbox"
+ENV SELENIUM_ARGS="disk-cache-dir=/tmp/seleniumcache,disable-translate,disable-sync,no-first-run,safebrowsing-disable-auto-update,disable-background-networking,no-sandbox,disable-setuid-sandbox"
 CMD [ "node", "main.js" ]

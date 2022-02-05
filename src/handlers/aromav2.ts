@@ -4,7 +4,7 @@
 
 import {Request, Response} from "express";
 import {errorResponse, responseStatus} from "../utils/response_utilities";
-import {Builder, By, ThenableWebDriver, WebElementCondition, Condition, until} from "selenium-webdriver";
+import {Builder, By, ThenableWebDriver, until} from "selenium-webdriver";
 import {Restaurant} from "../models/Restaurant";
 import {AsyncIterator} from "../utils/iterator";
 import {elementLocated} from "selenium-webdriver/lib/until";
@@ -177,7 +177,20 @@ export function getMenuOptions(req: Request, res: Response) {
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
-            const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
+            // Disable image loading to save
+            const chromeConfig = {
+                prefs: {
+                    profile: {
+                        managed_default_content_settings: {
+                            images: 2
+                        },
+                        default_content_setting_values: {
+                            images: 2
+                        }
+                    }
+                }
+            }
+            const driver = new Builder().setChromeOptions(options).withCapabilities(chromeConfig).forBrowser("chrome").build();
             driver.get(url+(fullUrl ? "" : "/Default.aspx")).then(() => {
                 getRestaurantList(driver).then(restaurants => {
                     userCache.setItem(hashKey, restaurants, {ttl: 3600}).then(() => {
@@ -263,7 +276,20 @@ export function getRestaurantPage(req: Request, res: Response) {
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
-            const driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
+            // Disable image loading to save
+            const chromeConfig = {
+                prefs: {
+                    profile: {
+                        managed_default_content_settings: {
+                            images: 2
+                        },
+                        default_content_setting_values: {
+                            images: 2
+                        }
+                    }
+                }
+            }
+            const driver = new Builder().setChromeOptions(options).withCapabilities(chromeConfig).forBrowser("chrome").build();
             driver.get(url+(fullUrl ? "" : "/Default.aspx")).then(() => {
                 selectRestaurant(driver, id).then(() => {
                     getRestaurantPDFLink(driver).then(pdfUrl => {

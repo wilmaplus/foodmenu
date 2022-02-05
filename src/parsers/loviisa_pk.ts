@@ -8,11 +8,11 @@ import {Day} from "../models/Day";
 import {Meal} from "../models/Meal";
 import {HashUtils} from "../crypto/hash";
 import {Menu} from "../models/Menu";
-import {errorResponse} from "../utils/response_utilities";
+import {removeImagesFromPDF} from "../utils/pdf";
 const pdfParser = require("pdfreader");
 
-const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
-const whitespace = " ";
+/*const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
+const whitespace = " ";*/
 
 const type = "loviisa_pk";
 
@@ -23,9 +23,16 @@ export function parsePDFLink(html: string): string|undefined {
     return links.getAttribute("href");
 }
 
-export function parse(content: any, callback: (content: Day[]|undefined) => void) {
+export async function parse(content: any, callback: (content: Day[]|undefined) => void) {
     let rows: any = {}; // indexed by y-position
     let days: Day[] = [];
+    // Due to a bug in PDF parser, images cause it not to parse any text.
+    // Removing images before parsing helps to circumvent this issue, until dev behind the lib fixes that issue,
+    try {
+        content = await removeImagesFromPDF(content);
+    } catch (e) {
+        console.error(e);
+    }
     new pdfParser.PdfReader().parseBuffer(content, (pdfError: Error, pdf: any) => {
         if (pdfError) {
             callback(undefined);

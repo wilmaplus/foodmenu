@@ -9,6 +9,7 @@ import {Moment} from "moment/moment";
 import {Meal} from "../models/Meal";
 import {HashUtils} from "../crypto/hash";
 import {Diet} from "../models/Diet";
+import {removeImagesFromPDF} from "../utils/pdf";
 
 const pdfParser = require("pdfreader");
 
@@ -17,10 +18,17 @@ const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
 const type = "aromiv2";
 
 
-export function parse(content: any, callback: (content: Day[]|undefined, diets: Diet[]|undefined) => void) {
+export async function parse(content: any, callback: (content: Day[]|undefined, diets: Diet[]|undefined) => void) {
     let rows: any = {}; // indexed by y-position
     let days: Day[] = [];
     let diets: Diet[] = [];
+    // Due to a bug in PDF parser, images cause it not to parse any text.
+    // Removing images before parsing helps to circumvent this issue, until dev behind the lib fixes that issue,
+    try {
+        content = await removeImagesFromPDF(content);
+    } catch (e) {
+        console.error(e);
+    }
     new pdfParser.PdfReader().parseBuffer(content, (pdfError: {parserError: string}, pdf: any) => {
         if (pdfError) {
             // This error occurs when menu is empty
