@@ -16,6 +16,7 @@ import {HashUtils} from "../crypto/hash";
 import {Day} from "../models/Day";
 import {Diet} from "../models/Diet";
 import {Options} from "selenium-webdriver/chrome";
+import moment from "moment";
 
 const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/;
 let httpClient = new Http();
@@ -250,17 +251,29 @@ export function getRestaurantPage(req: Request, res: Response) {
                 });
             });
         };
-        /*const contains = (item: string, items: Diet[]) => {
+        const contains = (item: string, items: Diet[]) => {
             let found = false;
             items.forEach(item2 => {
                 if (item.toLowerCase() == item2.name.toLowerCase())
                     found = true;
             });
             return found;
-        }*/
-        // Revert to single week, because request is taking too long to complete
+        }
+        // Now that performance issues are fixed, include next week
         fetchDate("1", (restaurants, diets) => {
-            responseStatus(res, 200, true, {menu: restaurants, diets: diets});
+            // Fetch next week, if it's necessary. Otherwise, skip it.
+            if (restaurants.filter(i => {return moment() > i.date}).length < 1) {
+                fetchDate("2", ((restaurants1, diets1) => {
+                    restaurants1.forEach(item => restaurants.push(item));
+                    diets1.forEach(dItem => {if (!contains(dItem.name, diets)) {diets.push(dItem)}});
+                    responseStatus(res, 200, true, {menu: restaurants, diets: diets});
+                }), error => {
+                    errorResponse(res, 500, error);
+                    return;
+                });
+            } else {
+                responseStatus(res, 200, true, {menu: restaurants, diets: diets});
+            }
         }, error => {
             errorResponse(res, 500, error);
             return;
@@ -298,7 +311,7 @@ export function getRestaurantPage(req: Request, res: Response) {
                             responseStatus(res, 200, true, {menu: [], diets: []});
                             return;
                         }
-                        pdfUrl = pdfUrl.replace("DateMode=0", "DateMode=%dmd%");
+                        pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
                         userCache.setItem(hashKey, pdfUrl, {ttl: 3600}).then(() => {
                             fetchDocument(pdfUrl);
                         }).catch(error => {
