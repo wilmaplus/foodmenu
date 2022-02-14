@@ -10,7 +10,6 @@ import {Meal} from "../models/Meal";
 import {HashUtils} from "../crypto/hash";
 import {Diet} from "../models/Diet";
 import {removeImagesFromPDF} from "../utils/pdf";
-
 const pdfParser = require("pdfreader");
 
 const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
@@ -139,4 +138,46 @@ export async function parse(content: any, callback: (content: Day[]|undefined, d
             (rows[pdf.y] = rows[pdf.y] || []).push({text: pdf.text, x: pdf.x});
         }
     });
+}
+
+export async function parseRSSFeed(content: any, callback: (content: Day[]|undefined) => void) {
+    try {
+        if (content && content.name === 'rss' && content.children.filter((i: any) => {return i.name === 'channel'})) {
+            let channel = content.children.filter((i: any) => {return i.name === 'channel'})[0];
+            let items = channel.children.filter((i: any) => {return i.name === 'item'});
+            let days: Day[] = [];
+            items.forEach((item: any) => {
+                let title = item.children.filter((i: any) => i.name === 'title');
+                let desc = item.children.filter((i: any) => i.name === 'description');
+                let id = item.children.filter((i: any) => i.name === 'guid');
+                if (title && desc) {
+                    title = title[0].value;
+                    desc = desc[0].value;
+                    id = id[0] || type
+                    let tempMenuList: Menu[] = [];
+                    // Items parser
+                    for (let subItem of desc.split('<br>')) {
+                        let split = subItem.split(':');
+                        let name = split[0].trim();
+                        let value = split[1].trimStart();
+                        tempMenuList.push(new Menu(name, [new Meal(value, HashUtils.sha1Digest(name+'_'+id))]))
+                    }
+                    // Parse date
+                    if (title.match(dateRegex)) {
+                        let dateResults = dateRegex.exec(title);
+                        if (dateResults) {
+                            let date = moment(dateResults[0], "DD.MM.YYYY").startOf('day');
+                            days.push(new Day(date, tempMenuList))
+                        }
+                    }
+                }
+            })
+            callback(days);
+            return;
+        }
+        callback(undefined);
+    } catch (e) {
+        console.error(e);
+        callback(undefined);
+    }
 }

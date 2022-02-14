@@ -9,7 +9,7 @@ import {Restaurant} from "../models/Restaurant";
 import {AsyncIterator} from "../utils/iterator";
 import {elementLocated} from "selenium-webdriver/lib/until";
 import {Http} from "../net/http";
-import {parse} from "../parsers/aromiv2";
+import {parse, parseRSSFeed} from "../parsers/aromiv2";
 import {CacheContainer} from "node-ts-cache";
 import {MemoryStorage} from "node-ts-cache-storage-memory";
 import {HashUtils} from "../crypto/hash";
@@ -237,18 +237,32 @@ export function getRestaurantPage(req: Request, res: Response) {
         url = url.substr(0, url.length-1);
     const fetchDocument = (pdfUrl: string) => {
         const fetchDate = (date: string, callback: (restaurants: Day[], diets: Diet[]) => void, errorCallback: (error: Error | null) => void) => {
-            httpClient.get(pdfUrl.replace("%dmd%", date), (error, response) =>  {
-                if (error || response == undefined) {
-                    errorCallback(error);
+            let rssFeedUrl = pdfUrl.replace("%dmd%", date).replace("Pdf.aspx", "Rss.aspx").replace("pdf.aspx", "rss.aspx");
+            httpClient.get(rssFeedUrl, (rssError, rssResponse) => {
+                if (rssError || rssResponse == undefined) {
+                    errorCallback(rssError);
                     return;
                 }
-                parse(response.body, (restaurants, diets) => {
-                    if (restaurants == undefined || diets == undefined) {
-                        errorCallback(new Error("Unable to parse menu!"));
+                parseRSSFeed(rssResponse.body, (rssRestaurants) => {
+                    if (rssRestaurants == undefined) {
+                        // before throwing an error, try PDF file
+                        httpClient.get(pdfUrl.replace("%dmd%", date), (error, response) =>  {
+                            if (error || response == undefined) {
+                                errorCallback(error);
+                                return;
+                            }
+                            parse(response.body, (restaurants, diets) => {
+                                if (restaurants == undefined || diets == undefined) {
+                                    errorCallback(new Error("Unable to parse menu!"));
+                                    return;
+                                }
+                                callback(restaurants, diets);
+                            });
+                        });
                         return;
                     }
-                    callback(restaurants, diets);
-                });
+                    callback(rssRestaurants, []);
+                })
             });
         };
         const contains = (item: string, items: Diet[]) => {
