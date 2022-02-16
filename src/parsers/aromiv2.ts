@@ -160,7 +160,7 @@ export async function parseRSSFeed(content: any, callback: (content: Day[]|undef
                         let split = subItem.split(':');
                         let name = split[0].trim();
                         let value = split[1].trimStart();
-                        tempMenuList.push(new Menu(name, [new Meal(value, HashUtils.sha1Digest(name+'_'+id))]))
+                        tempMenuList.push(new Menu(name, [new Meal(HashUtils.sha1Digest(name+'_'+id), value)]))
                     }
                     // Parse date
                     if (title.match(dateRegex)) {
