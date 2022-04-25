@@ -22,6 +22,21 @@ const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]
 let httpClient = new Http();
 let userCache = new CacheContainer(new MemoryStorage());
 
+// Disable image loading to save
+const chromeConfig = {
+    profile: {
+        default_content_setting_values: {'images': 2,
+            'plugins': 2, 'popups': 2, 'geolocation': 2,
+            'notifications': 2, 'auto_select_certificate': 2, 'fullscreen': 2,
+            'mouselock': 2, 'mixed_script': 2, 'media_stream': 2,
+            'media_stream_mic': 2, 'media_stream_camera': 2, 'protocol_handlers': 2,
+            'ppapi_broker': 2, 'automatic_downloads': 2, 'midi_sysex': 2,
+            'push_messaging': 2, 'ssl_cert_decisions': 2, 'metro_switch_to_desktop': 2,
+            'protected_media_identifier': 2, 'app_banner': 2, 'site_engagement': 2,
+            'durable_storage': 2}
+    }
+}
+
 
 function getRestaurantList(driver: ThenableWebDriver) {
     return new Promise<Restaurant[]>((resolve, reject) => {
@@ -174,24 +189,12 @@ export function getMenuOptions(req: Request, res: Response) {
         if (cachedValue) {
             responseStatus(res, 200, true, {restaurants: cachedValue});
         } else {
-            let options = new Options().headless().windowSize({width: 1270, height: 780});
+            let options = new Options().headless().windowSize({width: 700, height: 100});
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
-            // Disable image loading to save
-            const chromeConfig = {
-                prefs: {
-                    profile: {
-                        managed_default_content_settings: {
-                            images: 2
-                        },
-                        default_content_setting_values: {
-                            images: 2
-                        }
-                    }
-                }
-            }
-            const driver = new Builder().setChromeOptions(options).withCapabilities(chromeConfig).forBrowser("chrome").build();
+            options.setUserPreferences(chromeConfig)
+            const driver = new Builder().setChromeOptions(options).forBrowser("chrome").build();
             driver.get(url+(fullUrl ? "" : "/Default.aspx")).then(() => {
                 getRestaurantList(driver).then(restaurants => {
                     userCache.setItem(hashKey, restaurants, {ttl: 3600}).then(() => {
@@ -238,6 +241,7 @@ export function getRestaurantPage(req: Request, res: Response) {
     const fetchDocument = (pdfUrl: string) => {
         const fetchDate = (date: string, callback: (restaurants: Day[], diets: Diet[]) => void, errorCallback: (error: Error | null) => void) => {
             let rssFeedUrl = pdfUrl.replace("%dmd%", date).replace("Pdf.aspx", "Rss.aspx").replace("pdf.aspx", "rss.aspx");
+
             httpClient.get(rssFeedUrl, (rssError, rssResponse) => {
                 if (rssError || rssResponse == undefined) {
                     errorCallback(rssError);
@@ -299,24 +303,12 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            let options = new Options().headless().windowSize({width: 1270, height: 780});
+            let options = new Options()/*.headless()*/.windowSize({width: 700, height: 100});
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
-            // Disable image loading to save
-            const chromeConfig = {
-                prefs: {
-                    profile: {
-                        managed_default_content_settings: {
-                            images: 2
-                        },
-                        default_content_setting_values: {
-                            images: 2
-                        }
-                    }
-                }
-            }
-            const driver = new Builder().setChromeOptions(options).withCapabilities(chromeConfig).forBrowser("chrome").build();
+            options.setUserPreferences(chromeConfig)
+            const driver = new Builder().setChromeOptions(options).forBrowser("chrome").build();
             driver.get(url+(fullUrl ? "" : "/Default.aspx")).then(() => {
                 selectRestaurant(driver, id).then(() => {
                     getRestaurantPDFLink(driver).then(pdfUrl => {

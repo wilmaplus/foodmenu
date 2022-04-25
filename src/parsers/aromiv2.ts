@@ -153,14 +153,16 @@ export async function parseRSSFeed(content: any, callback: (content: Day[]|undef
                 if (title && desc) {
                     title = title[0].value;
                     desc = desc[0].value;
-                    id = id[0] || type
+                    id = id[0]?.value
                     let tempMenuList: Menu[] = [];
                     // Items parser
                     for (let subItem of desc.split('<br>')) {
                         let split = subItem.split(':');
                         let name = split[0].trim();
+                        if (name[name.length-1] === ".")
+                            name = name.slice(0,-1);
                         let value = split[1].trimStart();
-                        tempMenuList.push(new Menu(name, [new Meal(HashUtils.sha1Digest(name+'_'+id), value)]))
+                        tempMenuList.push(new Menu(name, [new Meal(HashUtils.sha1Digest(type+name+'_'+value), value)]))
                     }
                     // Parse date
                     if (title.match(dateRegex)) {
