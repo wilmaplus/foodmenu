@@ -303,7 +303,7 @@ export function getRestaurantPage(req: Request, res: Response) {
         if (value)
             fetchDocument(value as string);
         else {
-            let options = new Options()/*.headless()*/.windowSize({width: 700, height: 100});
+            let options = new Options().headless().windowSize({width: 700, height: 100});
             if ((global as any).seleniumArgs != null) {
                 options.addArguments((global as any).seleniumArgs.split(","));
             }
