@@ -24,7 +24,7 @@ export function parse(html: string, type: string): {menu: Day[], diets: Diet[]}|
             smIcon.set_content("❤");
     }
     let items: Day[] = [];
-    let cards = document.querySelectorAll("div[class^=\"lunch-menu__day\"]");
+    let cards = document.querySelectorAll("div[class^=\"lunch-menu__day\"]").slice(1);
     if (cards !== undefined) {
         for (let card of cards) {
             let pElem = card.querySelectorAll("p");
