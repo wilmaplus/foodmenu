@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 wilmaplus-foodmenu, developed by @developerfromjokela, for Wilma Plus mobile app
+ * Copyright (c) 2022 wilmaplus-foodmenu, developed by @developerfromjokela, for Wilma Plus mobile app
  */
 
 import moment from 'moment';
@@ -16,7 +16,11 @@ const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
 
 const type = "aromiv2";
 
-
+/**
+ * Parse PDF document and extract all menu items
+ * @param content PDF content
+ * @param callback Callback function
+ */
 export async function parse(content: any, callback: (content: Day[]|undefined, diets: Diet[]|undefined) => void) {
     let rows: any = {}; // indexed by y-position
     let days: Day[] = [];
@@ -140,13 +144,17 @@ export async function parse(content: any, callback: (content: Day[]|undefined, d
     });
 }
 
-export async function parseRSSFeed(content: any, callback: (content: Day[]|undefined) => void) {
+/**
+ * Parse RSS feed content and extract menu info
+ * @param content RSS feed content
+ */
+export async function parseRSSFeed(content: any) {
     try {
         if (content && content.name === 'rss' && content.children.filter((i: any) => {return i.name === 'channel'})) {
             let channel = content.children.filter((i: any) => {return i.name === 'channel'})[0];
             let items = channel.children.filter((i: any) => {return i.name === 'item'});
             let days: Day[] = [];
-            items.forEach((item: any) => {
+            for (let item of items) {
                 let title = item.children.filter((i: any) => i.name === 'title');
                 let desc = item.children.filter((i: any) => i.name === 'description');
                 let id = item.children.filter((i: any) => i.name === 'guid');
@@ -173,13 +181,12 @@ export async function parseRSSFeed(content: any, callback: (content: Day[]|undef
                         }
                     }
                 }
-            })
-            callback(days);
-            return;
+            }
+            return days;
         }
-        callback(undefined);
+        return undefined
     } catch (e) {
         console.error(e);
-        callback(undefined);
+        return undefined;
     }
 }

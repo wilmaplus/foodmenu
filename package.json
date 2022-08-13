@@ -1,6 +1,6 @@
 {
   "name": "foodmenu",
-  "version": "1.0.9.4",
+  "version": "1.1.0",
   "description": "This API provides additional food menus which are not available as JSON.\nThis middleware converts them to JSON format.",
   "main": "build/main.js",
   "scripts": {
