@@ -240,7 +240,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
         // Now that performance issues are fixed, include next week
         let {days, diets} = await fetchDate("1");
         // Fetch next week, if it's necessary. Otherwise, skip it.
-        if (days.filter(i => {return moment() > i.date}).length < 1) {
+        if (days.filter(i => {return moment().isBefore(moment(i.date))}).length < 1) {
             let {days: days1, diets: diets1} = await fetchDate("2");
             days1.forEach(item => days.push(item));
             diets1.forEach(dItem => {if (!contains(dItem.name, diets)) {diets.push(dItem)}});

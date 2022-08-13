@@ -42,14 +42,12 @@ USER root
 RUN apk add --no-cache ca-certificates tzdata mailcap
 
 
-COPY package.json .
-RUN wget https://github.com/wilmaplus/foodmenu/releases/latest/download/dist.tar.gz
-RUN tar -xf dist.tar.gz
-RUN rm dist.tar.gz
+COPY . .
 USER chrome
 RUN npm install
+RUN npm run build
 
 # Enable disk cache to speed up page load times, and disables miscellanous shit not necessary for chome
 # Docker in itself is a sandbox, so can't care less about chromium sandbox. Chrome won't be handling any personal data anyways.
 ENV SELENIUM_ARGS="disk-cache-dir=/tmp/seleniumcache,disable-translate,disable-sync,no-first-run,safebrowsing-disable-auto-update,disable-background-networking,no-sandbox,disable-setuid-sandbox"
-CMD [ "node", "main.js" ]
+CMD [ "node", "build/main.js" ]
