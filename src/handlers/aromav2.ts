@@ -167,6 +167,9 @@ export async function getMenuOptions(req: Request, res: Response) {
             // Set cache
             await userCache.setItem(hashKey, restaurants, {ttl: 3600})
             responseStatus(res, 200, true, {restaurants});
+            setTimeout(() => {
+                try {driver.close().catch(() => {})} catch (ignored) {}
+            }, 500);
         }
     } catch (error: any) {
         logSeleniumErr(error, "getMenuOptions")
