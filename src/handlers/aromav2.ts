@@ -250,7 +250,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
         }
         if (driver != null) {
             setTimeout(() => {
-                try {driver.close()} catch (ignored) {}
+                try {driver.close().catch(() => {})} catch (ignored) {}
             }, 500);
         }
     }
@@ -276,7 +276,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
             } catch (e) {
                 // Close driver before quitting request process
                 setTimeout(() => {
-                    try {driver.close()} catch (ignored) {}
+                    try {driver.close().catch(() => {})} catch (ignored) {}
                 }, 500);
                 throw e;
             }
