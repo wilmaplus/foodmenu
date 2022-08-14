@@ -261,13 +261,13 @@ export async function getRestaurantPage(req: Request, res: Response) {
                 await driver.get(url+(fullUrl ? "" : "/Default.aspx"));
                 await selectRestaurant(driver, id)
                 let pdfUrl = await getRestaurantPDFLink(driver);
-                await driver.close();
                 if (pdfUrl == null) {
                     responseStatus(res, 200, true, {menu: [], diets: []});
                     return;
                 }
                 pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
                 await userCache.setItem(hashKey, pdfUrl, {ttl: 3600})
+                try {driver.close()} catch (ignored) {}
                 await fetchDocument(pdfUrl)
             } catch (e) {
                 // Close driver before quitting request process
