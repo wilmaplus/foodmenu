@@ -13,7 +13,7 @@ import {CacheContainer} from "node-ts-cache";
 import {MemoryStorage} from "node-ts-cache-storage-memory";
 import {HashUtils} from "../crypto/hash";
 import {Diet} from "../models/Diet";
-import {Options} from "selenium-webdriver/chrome";
+import {Driver, Options} from "selenium-webdriver/chrome";
 import moment from "moment";
 import {Day} from "../models/Day";
 
@@ -194,7 +194,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
     }
     if (url.endsWith("/"))
         url = url.substr(0, url.length-1);
-    const fetchDocument = async (pdfUrl: string) => {
+    const fetchDocument = async (pdfUrl: string, driver: Driver|null) => {
         const fetchDate = async (date: string) : Promise<{ days: Day[], diets: Diet[] }> => {
             let rssFeedUrl = pdfUrl.replace("%dmd%", date).replace("Pdf.aspx", "Rss.aspx").replace("pdf.aspx", "rss.aspx");
 
@@ -248,13 +248,18 @@ export async function getRestaurantPage(req: Request, res: Response) {
         } else {
             responseStatus(res, 200, true, {menu: days, diets: diets});
         }
+        if (driver != null) {
+            setTimeout(() => {
+                try {driver.close()} catch (ignored) {}
+            }, 500);
+        }
     }
 
     try {
         let hashKey = HashUtils.sha1Digest(url+"_"+id);
         let cache = await userCache.getItem(hashKey);
         if (cache) {
-            return (await fetchDocument(cache as string))
+            return (await fetchDocument(cache as string, null))
         } else {
             const driver = getSeleniumDriver();
             try {
@@ -267,10 +272,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
                 }
                 pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
                 await userCache.setItem(hashKey, pdfUrl, {ttl: 3600})
-                setTimeout(() => {
-                    try {driver.close()} catch (ignored) {}
-                }, 500);
-                await fetchDocument(pdfUrl)
+                await fetchDocument(pdfUrl, driver)
             } catch (e) {
                 // Close driver before quitting request process
                 setTimeout(() => {
