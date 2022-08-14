@@ -267,11 +267,15 @@ export async function getRestaurantPage(req: Request, res: Response) {
                 }
                 pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
                 await userCache.setItem(hashKey, pdfUrl, {ttl: 3600})
-                try {driver.close()} catch (ignored) {}
+                setTimeout(() => {
+                    try {driver.close()} catch (ignored) {}
+                }, 500);
                 await fetchDocument(pdfUrl)
             } catch (e) {
                 // Close driver before quitting request process
-                await driver.close();
+                setTimeout(() => {
+                    try {driver.close()} catch (ignored) {}
+                }, 500);
                 throw e;
             }
         }
