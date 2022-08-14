@@ -194,7 +194,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
     }
     if (url.endsWith("/"))
         url = url.substr(0, url.length-1);
-    const fetchDocument = async (pdfUrl: string, driver: Driver|null) => {
+    const fetchDocument = async (pdfUrl: string, driver: ThenableWebDriver|null) => {
         const fetchDate = async (date: string) : Promise<{ days: Day[], diets: Diet[] }> => {
             let rssFeedUrl = pdfUrl.replace("%dmd%", date).replace("Pdf.aspx", "Rss.aspx").replace("pdf.aspx", "rss.aspx");
 
