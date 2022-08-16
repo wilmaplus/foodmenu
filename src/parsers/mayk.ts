@@ -12,7 +12,6 @@ import { Diet } from "../models/Diet";
 import { Meal } from "../models/Meal";
 
 const dateRegex = /\b[A-Z].*?\b/;
-const weekRegex = /\d+/;
 const type = "mayk";
 
 function convertDayName(name: string) {
@@ -37,7 +36,6 @@ export function parse(html: string): { menu: Day[], diets: Diet[] } | undefined 
 
     let currentDayDate: undefined | Moment = undefined;
     let week = document.querySelector(".ruokalista-viikko").textContent;
-    let weekResult = dateRegex.exec(week);
 
     let contentBox = document.querySelector(".ruoka-template");
     if (contentBox !== null) {
@@ -50,13 +48,13 @@ export function parse(html: string): { menu: Day[], diets: Diet[] } | undefined 
             days.forEach(day => {
                 let regexResult = dateRegex.exec(day.textContent)
 
-                if (regexResult != null && weekResult != null) {
+                if (regexResult != null && week) {
                     weekdays.push(regexResult[0]);
 
                     for (let i = 0; i < weekdays.length; i++) {
                         let newDay = convertDayName(weekdays[i].toLowerCase());
                         
-                        currentDayDate = moment().day(newDay).week(parseInt(weekResult[0])).startOf('day');
+                        currentDayDate = moment().day(newDay).week(parseInt(week, 10)).startOf('day');
                     }
                 }
             })
