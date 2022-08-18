@@ -2,8 +2,10 @@ version: "2"
 
 services:
   foodmenu:
-    build: ./
+    build:
+      context: .
     image: foodmenu_server
+    shm_size: '2gb'
     environment:
       SKIP_SELENIUM_QUIT: ${SKIP_SELENIUM_QUIT}
     ports:
