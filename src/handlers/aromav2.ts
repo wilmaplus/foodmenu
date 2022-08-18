@@ -167,9 +167,11 @@ export async function getMenuOptions(req: Request, res: Response) {
             // Set cache
             await userCache.setItem(hashKey, restaurants, {ttl: 3600})
             responseStatus(res, 200, true, {restaurants});
-            setTimeout(() => {
-                try {driver.close().catch(() => {})} catch (ignored) {}
-            }, 500);
+            if (process.env.SKIP_SELENIUM_QUIT != "false") {
+                setTimeout(() => {
+                    try {driver.close().catch(() => {})} catch (ignored) {}
+                }, 500);
+            }
         }
     } catch (error: any) {
         logSeleniumErr(error, "getMenuOptions")
@@ -251,7 +253,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
         } else {
             responseStatus(res, 200, true, {menu: days, diets: diets});
         }
-        if (driver != null) {
+        if (driver != null && process.env.SKIP_SELENIUM_QUIT == "false") {
             setTimeout(() => {
                 try {driver.close().catch(() => {})} catch (ignored) {}
             }, 500);
@@ -278,9 +280,11 @@ export async function getRestaurantPage(req: Request, res: Response) {
                 await fetchDocument(pdfUrl, driver)
             } catch (e) {
                 // Close driver before quitting request process
-                setTimeout(() => {
-                    try {driver.close().catch(() => {})} catch (ignored) {}
-                }, 500);
+                if (process.env.SKIP_SELENIUM_QUIT == "false") {
+                    setTimeout(() => {
+                        try {driver.close().catch(() => {})} catch (ignored) {}
+                    }, 500);
+                }
                 throw e;
             }
         }
