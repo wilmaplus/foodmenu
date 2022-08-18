@@ -4,6 +4,8 @@ services:
   foodmenu:
     build: ./
     image: foodmenu_server
+    environment:
+      SKIP_SELENIUM_QUIT: ${SKIP_SELENIUM_QUIT}
     ports:
       - "8081:3001"
     restart: unless-stopped
