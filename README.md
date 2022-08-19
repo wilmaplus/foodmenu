@@ -16,6 +16,7 @@ This middleware parses HTML or PDF and then converts them to JSON format.
 - Looki ([https://looki.fi/](https://looki.fi/))
 - SYK ([https://syk.fi/](https://syk.fi/))
 - TYK ([https://www.tyk.fi/yhteiskoulu/tietoa/ruokala/](https://www.tyk.fi/yhteiskoulu/tietoa/ruokala/))
+- MAYK ([https://www.mayk.fi/tietoa-meista/ruokailu/](https://www.mayk.fi/tietoa-meista/ruokailu/))
 - PHYK ([https://www.phyk.fi/ruokalista/](https://www.phyk.fi/ruokalista/))
 - Any Aromi V2 (aka. Aromi SaaS)
 
