@@ -8,14 +8,16 @@ import {Builder, By, ThenableWebDriver, until, WebElement} from "selenium-webdri
 import {Restaurant} from "../models/Restaurant";
 import {elementLocated} from "selenium-webdriver/lib/until";
 import {Http} from "../net/http";
-import {parse, parseRSSFeed} from "../parsers/aromiv2";
+import {extractFormParams, extractRestaurantPDFLink, parse, parseRestaurants, parseRSSFeed} from "../parsers/aromiv2";
 import {CacheContainer} from "node-ts-cache";
 import {MemoryStorage} from "node-ts-cache-storage-memory";
 import {HashUtils} from "../crypto/hash";
 import {Diet} from "../models/Diet";
-import {Driver, Options} from "selenium-webdriver/chrome";
+import {Options} from "selenium-webdriver/chrome";
 import moment from "moment";
 import {Day} from "../models/Day";
+import fetch from "node-fetch";
+import {Cookies} from "needle";
 
 const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/;
 let httpClient = new Http();
@@ -75,6 +77,22 @@ async function getRestaurantList(driver: ThenableWebDriver) {
 }
 
 /**
+ * Get all restaurant options directly from HTML code
+ */
+async function getRestaurantListFromUrl(url: string) {
+    const httpResp: string = await new Promise((resolve, reject) => {
+        httpClient.get(url, (fetchErr, fetchResp) => {
+            if (fetchErr || fetchResp == undefined) {
+                reject(fetchResp);
+                return;
+            }
+            resolve(fetchResp.body);
+        });
+    })
+    return parseRestaurants(httpResp);
+}
+
+/**
  * Select restaurant option from picker
  * @param driver Selenium driver
  * @param id ID for UI picker element
@@ -115,7 +133,7 @@ async function selectRestaurant(driver: ThenableWebDriver, id: string) {
  */
 async function getRestaurantPDFLink(driver: ThenableWebDriver) {
     await driver.wait(elementLocated(By.id("MainContent_PdfUrl")));
-    var pdfUrl = await driver.findElement(By.id("MainContent_PdfUrl"));
+    const pdfUrl = await driver.findElement(By.id("MainContent_PdfUrl"));
     let href = await pdfUrl.getAttribute("href");
     if (href == null) {
         // First selection item does not produce anything, choosing another one.
@@ -135,6 +153,73 @@ async function getRestaurantPDFLink(driver: ThenableWebDriver) {
     } else {
         return href;
     }
+}
+
+/**
+ * Get link for PDF print, which contains menu ID
+ *
+ * Compared to old method, this makes requests to ASPX endpoint and skips resource-intensive selenium brainfuck
+ * Thank aromi food service (or CGI Finland or whoever the fuck runs this) for making life be such pain
+ * @param url Selenium Driver
+ * @param restaurantId Restaurant ID
+ */
+async function getRestaurantPDFLinkDirect(url: string, restaurantId: string) {
+    const httpResp: {body: string, cookies: Cookies|undefined} = await new Promise((resolve, reject) => {
+        httpClient.get(url, (fetchErr, fetchResp) => {
+            if (fetchErr || fetchResp == undefined) {
+                reject(fetchResp);
+                return;
+            }
+            resolve({body: fetchResp.body, cookies: fetchResp.cookies});
+        });
+    })
+
+    // Extract parameters for request
+    const formParams = await extractFormParams(httpResp.body);
+
+    // Make this unnecessary and fucked up request
+    const data = await fetch(url, {
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Haistka; Pska:) Saatana/20011109 CGIDevausTiimilleVitutJaPotkut/69.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-MicrosoftAjax": "Delta=true",
+            "Cache-Control": "no-cache",
+            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "Pragma": "no-cache",
+            "Cookie": Object.keys(httpResp.cookies||{}).map(i => `${i}=${(httpResp.cookies||{})[i]}`).join("; ")
+        },
+        "body": `ctl00%24ScriptManager1=ctl00%24MasterUpdatePanel%7Cctl00%24MainContent%24RestaurantDropDownList&__EVENTTARGET=ctl00%24MainContent%24RestaurantDropDownList&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE=${encodeURIComponent(formParams.get("__VIEWSTATE")||"")}&__VIEWSTATEGENERATOR=${formParams.get("__VIEWSTATEGENERATOR")}&__SCROLLPOSITIONX=0&__SCROLLPOSITIONY=0&__VIEWSTATEENCRYPTED=&__EVENTVALIDATION=${encodeURIComponent(formParams.get("__EVENTVALIDATION")||"")}&ctl00%24MainContent%24LanguagesDropDownList=fi&ctl00%24MainContent%24RestaurantTypeDropDownList=&ctl00%24MainContent%24RestaurantDropDownList=${restaurantId}&__ASYNCPOST=true&`,
+        "method": "POST",
+    });
+
+    // Extract real name of the f*ing menu
+    const str = await data.text();
+    const commandStrip = (str.split("\n")[0]).split("|");
+    const path = decodeURIComponent(commandStrip.find(i => i.includes("Restaurant.aspx"))||"");
+
+    // Make URL to request, in order to get PDF Link :::DDD
+    let newUrl = new URL(url);
+    newUrl.pathname = path
+    const pdfLinkRequest: string = await new Promise((resolve, reject) => {
+        httpClient.get(newUrl.toString(), (fetchErr, fetchResp) => {
+            if (fetchErr || fetchResp == undefined) {
+                reject(fetchResp);
+                return;
+            }
+            resolve(fetchResp.body);
+        });
+    })
+
+    // Finally, make PDF URL
+    const pdfPath = await extractRestaurantPDFLink(pdfLinkRequest)
+    if (!pdfPath)
+        return null
+    return newUrl.toString().replace("Restaurant.aspx", pdfPath);
 }
 
 /**
@@ -160,16 +245,23 @@ export async function getMenuOptions(req: Request, res: Response) {
         if (cache) {
             responseStatus(res, 200, true, {restaurants: cache});
         } else {
-            const driver = getSeleniumDriver();
-            await driver.get(url+(fullUrl ? "" : "/Default.aspx"));
-            let restaurants = await getRestaurantList(driver);
+            let driver: ThenableWebDriver | null = null;
+            let restaurants: Restaurant[]
+            try {
+                restaurants = await getRestaurantListFromUrl(url+(fullUrl ? "" : "/Default.aspx"));
+            } catch (e) {
+                console.log("Falling back to old method!", e);
+                driver = getSeleniumDriver();
+                await driver.get(url+(fullUrl ? "" : "/Default.aspx"));
+                restaurants = await getRestaurantList(driver);
+            }
 
             // Set cache
             await userCache.setItem(hashKey, restaurants, {ttl: 3600})
             responseStatus(res, 200, true, {restaurants});
             if (process.env.SKIP_SELENIUM_QUIT != "false") {
                 setTimeout(() => {
-                    try {driver.close().catch(() => {})} catch (ignored) {}
+                    try {driver?.close().catch(() => {})} catch (ignored) {}
                 }, 500);
             }
         }
@@ -266,27 +358,36 @@ export async function getRestaurantPage(req: Request, res: Response) {
         if (cache) {
             return (await fetchDocument(cache as string, null))
         } else {
-            const driver = getSeleniumDriver();
+            let pdfUrl: string|null = null
+            let driver: ThenableWebDriver|null = null
             try {
-                await driver.get(url+(fullUrl ? "" : "/Default.aspx"));
-                await selectRestaurant(driver, id)
-                let pdfUrl = await getRestaurantPDFLink(driver);
-                if (pdfUrl == null) {
-                    responseStatus(res, 200, true, {menu: [], diets: []});
-                    return;
-                }
-                pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
-                await userCache.setItem(hashKey, pdfUrl, {ttl: 3600})
-                await fetchDocument(pdfUrl, driver)
+                pdfUrl = await getRestaurantPDFLinkDirect(url+(fullUrl ? "" : "/Default.aspx"), id);
             } catch (e) {
-                // Close driver before quitting request process
-                if (process.env.SKIP_SELENIUM_QUIT == "false") {
-                    setTimeout(() => {
-                        try {driver.close().catch(() => {})} catch (ignored) {}
-                    }, 500);
+                // From now on, selenium method is only kept as backup
+                console.log(e);
+                driver = getSeleniumDriver();
+                try {
+                    await driver.get(url+(fullUrl ? "" : "/Default.aspx"));
+                    await selectRestaurant(driver, id)
+                    pdfUrl = await getRestaurantPDFLink(driver);
+
+                } catch (e) {
+                    // Close driver before quitting request process
+                    if (process.env.SKIP_SELENIUM_QUIT == "false") {
+                        setTimeout(() => {
+                            try {driver?.close().catch(() => {})} catch (ignored) {}
+                        }, 500);
+                    }
+                    console.log(e);
                 }
-                throw e;
             }
+            if (!pdfUrl) {
+                responseStatus(res, 200, true, {menu: [], diets: []});
+                return;
+            }
+            pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
+            await userCache.setItem(hashKey, pdfUrl, {ttl: 3600*24*3})
+            await fetchDocument(pdfUrl, driver)
         }
     } catch (error: any) {
         logSeleniumErr(error, "getRestaurantPage")

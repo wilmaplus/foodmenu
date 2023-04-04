@@ -10,11 +10,32 @@ import {Meal} from "../models/Meal";
 import {HashUtils} from "../crypto/hash";
 import {Diet} from "../models/Diet";
 import {removeImagesFromPDF} from "../utils/pdf";
+import * as parser from "node-html-parser";
+import {Restaurant} from "../models/Restaurant";
+
 const pdfParser = require("pdfreader");
 
 const dateRegex = /[0-9]+\.[0-9]+\.[0-9]{4}/;
 
 const type = "aromiv2";
+
+export async function parseRestaurants(html: string) {
+    let restaurants:Restaurant[] = [];
+    let document = parser.parse(html);
+    let optionsHtml = document.querySelectorAll('select#MainContent_RestaurantDropDownList>option:not([value=""])');
+    optionsHtml.forEach(link => {restaurants.push(new Restaurant(link?.attrs?.value, link?.text))});
+    return restaurants;
+}
+
+export async function extractFormParams(html: string) {
+    let document = parser.parse(html);
+    return new Map(document.querySelectorAll("input").map(e => [e?.attrs?.name, e?.attrs?.value]));
+}
+
+export async function extractRestaurantPDFLink(html: string) {
+    let document = parser.parse(html);
+    return document.querySelector("#MainContent_PdfUrl")?.attrs?.href;
+}
 
 /**
  * Parse PDF document and extract all menu items
