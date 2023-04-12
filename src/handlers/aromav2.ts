@@ -386,7 +386,7 @@ export async function getRestaurantPage(req: Request, res: Response) {
                 return;
             }
             pdfUrl = pdfUrl.replace(/DateMode=[0-9]/, "DateMode=%dmd%");
-            await userCache.setItem(hashKey, pdfUrl, {ttl: 3600*24*3})
+            await userCache.setItem(hashKey, pdfUrl, {ttl: 3600*24})
             await fetchDocument(pdfUrl, driver)
         }
     } catch (error: any) {

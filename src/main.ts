@@ -24,6 +24,7 @@ const issMenuList = require('./handlers/iss').handleISSMenuList;
 const issMenu = require('./handlers/iss').handleISSMenu;
 const ael = require('./handlers/ael').handleAEL;
 const aromaV2 = require('./handlers/aromav2');
+const matilda = require('./handlers/matilda');
 const loviisa = require('./handlers/loviisa_pk');
 
 (global as any).seleniumArgs = SELENIUM_ARGS;
@@ -49,8 +50,8 @@ app.use('/ael/menu', ael);
 app.use('/mantsala/menu', mantsala);
 app.use('/iss/menus', issMenuList);
 app.use('/iss/menu/:url', issMenu);
-app.use('/aroma/:url/restaurants/:id', aromaV2.getRestaurantPage);
-app.use('/aroma/:url/restaurants', aromaV2.getMenuOptions);
+app.use('/aroma/:url/restaurants/:id', (req, res) => req?.params?.url == "aromiv2://matilda" ? matilda.getRestaurantPage(req, res) : aromaV2.getRestaurantPage(req, res));
+app.use('/aroma/:url/restaurants',  (req, res) => req?.params?.url == "aromiv2://matilda" ? matilda.getMenuOptions(req, res) : aromaV2.getMenuOptions(req, res));
 app.use('/loviisa/paivakoti/menu', loviisa.handleLoviisaPk);
 
 app.get('*', (req, res) => {
