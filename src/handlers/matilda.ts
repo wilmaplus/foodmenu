@@ -77,11 +77,11 @@ export async function getRestaurantPage(req: Request, res: Response) {
 
         try {
             if (menuItems?.pageProps?.nextURL) {
-                let query = menuBaseUrl.pageProps.nextURL.split("?").pop()
+                let query = menuItems.pageProps.nextURL.split("?").pop()
                 let json = await getMenuData(buildId, realMenuId, "?"+query+"&id="+realMenuId);
                 days = [...days, ...await parseMatildaModel(json?.pageProps?.meals)];
             }
-        } catch (e) {}
+        } catch (e) {console.log(e)}
 
         await userCache.setItem(id, days, {ttl: 3600});
 
