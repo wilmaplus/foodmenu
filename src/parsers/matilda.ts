@@ -27,7 +27,7 @@ export async function parseMatildaModel(json: any) {
     }
 
     for (let key of Object.keys(daysMap)) {
-        let date = moment(key, "MM/DD/yyyy");
+        let date = moment(key);
         let menus: Menu[] = [];
         for (let i of daysMap[key]) {
             let meal = new Meal(HashUtils.sha1Digest(type+i.name+"_"+i.courses.map((i: { name: any; }) => i.name).join("\n")), i.courses.map((i: { name: any; }) => i.name).join("\n"))
